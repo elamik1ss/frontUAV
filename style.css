@@ -1,0 +1,297 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #f3f3f3;
+  color: #17181d;
+}
+
+body {
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 300px;
+  background: #1f2127;
+  color: #f4f5f7;
+  padding: 18px 18px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 5px 0 18px rgba(0, 0, 0, 0.15);
+  z-index: 500;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 4px 2px 10px;
+}
+
+.brand-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a0a0a0, #ffffff);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.brand-block h1 {
+  margin: 3px 0 0;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px 12px 10px;
+  margin-bottom: 16px;
+}
+
+.panel-header {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  margin-bottom: 10px;
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.side-button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f5f5f5;
+  border-radius: 10px;
+  padding: 12px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.side-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.side-button.active {
+  background: linear-gradient(180deg, #f3f3f3, #dfe3e8);
+  color: #16191d;
+  border-color: transparent;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.drone-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.drone-card.selected {
+  background: rgba(167, 193, 255, 0.08);
+  border-color: rgba(175, 200, 255, 0.36);
+}
+
+.drone-card__icon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3d4148, #1a1d22);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.drone-card__icon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -48%) rotate(180deg);
+  background: linear-gradient(135deg, #434b55, #1f2429);
+  clip-path: polygon(50% 0%, 100% 100%, 62% 100%, 50% 74%, 38% 100%, 0% 100%);
+  border-radius: 2px;
+}
+
+.drone-card__icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 64%;
+  width: 12px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50% 50% 45% 45%;
+  background: #0d0e11;
+}
+
+.drone-card__name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.drone-card__meta {
+  margin-top: 2px;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.legend-panel {
+  margin-top: 14px;
+}
+
+.legend-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-key {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.left-key {
+  background: #f5b700;
+  box-shadow: 0 0 0 3px rgba(245, 183, 0, 0.18);
+}
+
+.right-key {
+  background: #ff5d5d;
+  box-shadow: 0 0 0 3px rgba(255, 93, 93, 0.15);
+}
+
+.status-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.map-panel {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  background: #dfe3eb;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.leaflet-container {
+  background: #dfe8ef;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-radius: 8px 0 0 0 !important;
+}
+
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
+
+.country-zone {
+  border: 0 !important;
+}
+
+.route-marker {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50%;
+  background: #ffd166;
+  border: 2px solid rgba(51, 51, 51, 0.8);
+  box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.2);
+}
+
+.utility-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  background: rgba(20, 23, 27, 0.9);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.79rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 700;
+}
+
+.utility-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (max-width: 760px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+
+  .map-panel {
+    height: calc(100vh - 320px);
+  }
+}
