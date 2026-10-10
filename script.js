@@ -1,37 +1,15 @@
-const countryConfig = {
-  ukraine: {
-    label: 'Украина',
-    minLat: 44.2,
-    maxLat: 52.4,
-    minLng: 22.1,
-    maxLng: 41.8,
-    polygon: [
-      [44.2, 22.1],
-      [52.4, 22.1],
-      [52.4, 41.8],
-      [44.2, 41.8]
-    ]
-  },
-  russia: {
-    label: 'Россия',
-    minLat: 41,
-    maxLat: 81,
-    minLng: 19,
-    maxLng: 180,
-    polygon: [
-      [41, 19],
-      [81, 19],
-      [81, 180],
-      [41, 180]
-    ]
-  }
-};
+const countryGeoJsonUrl = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
 
 const state = {
   selectedSide: 'ukraine',
   drones: [],
   activeDrone: null,
-  toastTimer: null
+  toastTimer: null,
+  launched: false,
+  countryLayers: {
+    ukraine: null,
+    russia: null
+  }
 };
 
 const map = L.map('map', {
@@ -39,74 +17,17 @@ const map = L.map('map', {
   attributionControl: true,
   minZoom: 2,
   maxZoom: 12
-}).setView([58, 45], 4);
+}).setView([57, 40], 3);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-const zoneLayers = {
-  ukraine: L.polygon(countryConfig.ukraine.polygon, {
-    color: '#8fe4a6',
-    fillColor: '#8fe4a6',
-    fillOpacity: 0.18,
-    weight: 2,
-    className: 'country-zone'
-  }).addTo(map),
-  russia: L.polygon(countryConfig.russia.polygon, {
-    color: '#b7bdf6',
-    fillColor: '#b7bdf6',
-    fillOpacity: 0.15,
-    weight: 2,
-    className: 'country-zone'
-  }).addTo(map)
-};
-
 const statusBox = document.getElementById('statusBox');
 const sideButtons = [...document.querySelectorAll('.side-button')];
 const droneCard = document.getElementById('droneCard');
-
-const routePointIcon = L.divIcon({
-  className: 'route-marker',
-  iconSize: [12, 12],
-  iconAnchor: [6, 6]
-});
-
-const impactIcon = L.divIcon({
-  className: 'impact-marker',
-  html: '<span style="display:block; width:18px; height:18px; background:#ff5d5d; border:3px solid rgba(255,255,255,0.92); border-radius:50%; box-shadow:0 0 0 5px rgba(255,93,93,0.18);"></span>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9]
-});
-
-function createDroneIcon() {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
-      <path d="M22 41 L57 8 L98 41 L80 41 L72 92 L48 92 L40 41 Z" fill="#1f2127"/>
-      <path d="M60 18 L62 41 L58 41 Z" fill="#ffffff"/>
-      <path d="M52 92 L68 92 L70 105 L50 105 Z" fill="#0d0f12"/>
-      <path d="M50 64 L70 64 L74 84 L46 84 Z" fill="#505862"/>
-      <path d="M40 41 L80 41 L88 58 L32 58 Z" fill="#3b4047"/>
-      <path d="M45 58 L75 58 L64 70 L56 70 Z" fill="#dfe5ea"/>
-      <path d="M60 39 L62 44 L58 44 Z" fill="#ffffff"/>
-      <circle cx="60" cy="38" r="7" fill="#1e1e1e"/>
-      <path d="M34 44 L28 54 L32 55 L38 46 Z" fill="#30343a"/>
-      <path d="M86 44 L92 54 L88 55 L82 46 Z" fill="#30343a"/>
-      <path d="M54 90 L60 100 L66 90 Z" fill="#0a0d0f"/>
-      <circle cx="60" cy="102" r="5" fill="#1a1d20"/>
-    </svg>
-  `;
-
-  return L.icon({
-    iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-    iconSize: [80, 80],
-    iconAnchor: [40, 40],
-    popupAnchor: [0, -34]
-  });
-}
-
-const droneIcon = createDroneIcon();
+const launchBtn = document.getElementById('launchBtn');
 
 function showToast(message) {
   const toast = document.createElement('div');
@@ -125,60 +46,134 @@ function updateStatus(text) {
   statusBox.textContent = text;
 }
 
+function createDroneSvgIcon() {
+  const svgMarkup = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#353b42;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#171b20;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <path d="M50 10 L62 28 L72 46 L50 78 L28 46 L38 28 Z" fill="url(#grad1)" stroke="#4a4f56" stroke-width="1"/>
+      <path d="M32 48 L18 62 L25 64 L35 52 Z" fill="#2c3137"/>
+      <path d="M68 48 L82 62 L75 64 L65 52 Z" fill="#2c3137"/>
+      <path d="M46 70 L54 70 L58 87 L42 87 Z" fill="#171b20"/>
+      <path d="M42 36 L58 36 L63 46 L37 46 Z" fill="#dfe4ea" opacity="0.85"/>
+      <circle cx="50" cy="17" r="8" fill="#1d2128" stroke="#646d77" stroke-width="1"/>
+      <circle cx="50" cy="22" r="3" fill="#8aa1c7" opacity="0.8"/>
+      <path d="M28 55 L20 66 L28 67 L36 58 Z" fill="#2f343b"/>
+      <path d="M72 55 L80 66 L72 67 L64 58 Z" fill="#2f343b"/>
+    </svg>
+  `;
+
+  return L.divIcon({
+    html: svgMarkup,
+    className: 'drone-marker-container',
+    iconSize: [72, 72],
+    iconAnchor: [36, 36],
+    popupAnchor: [0, -35]
+  });
+}
+
+const droneIcon = createDroneSvgIcon();
+const routePointIcon = L.divIcon({
+  className: 'route-marker',
+  iconSize: [12, 12],
+  iconAnchor: [6, 6]
+});
+const impactIcon = L.divIcon({
+  className: 'impact-marker',
+  html: '<span style="display:block; width:18px; height:18px; background:#ff5d5d; border:3px solid rgba(255,255,255,0.92); border-radius:50%; box-shadow:0 0 0 5px rgba(255,93,93,0.18);"></span>',
+  iconSize: [18, 18],
+  iconAnchor: [9, 9]
+});
+
 function setSide(side) {
   state.selectedSide = side;
   sideButtons.forEach((button) => {
-    const active = button.dataset.side === side;
-    button.classList.toggle('active', active);
-  });
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Polygon && layer.options.className === 'country-zone') {
-      layer.setStyle({
-        fillOpacity: layer.getLatLngs()[0][0].lat === 44.2 ? (side === 'ukraine' ? 0.34 : 0.15) : (side === 'russia' ? 0.34 : 0.15)
-      });
-    }
+    button.classList.toggle('active', button.dataset.side === side);
   });
 
-  zoneLayers.ukraine.setStyle({ fillOpacity: side === 'ukraine' ? 0.34 : 0.18 });
-  zoneLayers.russia.setStyle({ fillOpacity: side === 'russia' ? 0.34 : 0.15 });
+  resetAllDrones();
 
-  state.activeDrone = null;
-  state.drones.forEach((drone) => {
-    map.removeLayer(drone.marker);
-    if (drone.routeLine) map.removeLayer(drone.routeLine);
-    if (drone.impactMarker) map.removeLayer(drone.impactMarker);
-    drone.routePoints = [];
-  });
-  state.drones = [];
-
-  updateStatus(
-    side === 'ukraine'
-      ? 'Украина выбрана. Нажмите на карту в пределах Украины, чтобы разместить дрон.'
-      : 'Россия выбрана. Нажмите на карту в пределах России, чтобы разместить дрон.'
-  );
+  if (side === 'ukraine') {
+    updateStatus('Украина выбрана. Нажмите на карту в пределах Украины, чтобы разместить дрон.');
+  } else {
+    updateStatus('Россия выбрана. Нажмите на карту в пределах России, чтобы разместить дрон.');
+  }
 }
 
-function isInsideCountry(lat, lng, country) {
-  const bounds = countryConfig[country];
-  if (lat < bounds.minLat || lat > bounds.maxLat) return false;
-  if (lng < bounds.minLng || lng > bounds.maxLng) return false;
+function resetAllDrones() {
+  state.activeDrone = null;
+  state.launched = false;
+  launchBtn.textContent = 'Запуск';
+  launchBtn.classList.remove('launched');
 
-  if (country === 'russia') {
-    if (lat >= 44.2 && lat <= 52.4 && lng >= 22.1 && lng <= 41.8) {
-      return false;
+  state.drones.forEach((drone) => {
+    map.removeLayer(drone.marker);
+    map.removeLayer(drone.routeLine);
+    if (drone.impactMarker) map.removeLayer(drone.impactMarker);
+    drone.routeMarkers.forEach((m) => map.removeLayer(m));
+  });
+
+  state.drones = [];
+}
+
+function isPointInsideCountry(lat, lng, countryCode) {
+  const geo = countryCode === 'ukraine' ? state.countryLayers.ukraine : state.countryLayers.russia;
+  if (!geo) return false;
+
+  const polygons = getPolygonsFromGeoJson(geo.toGeoJSON());
+  for (const polygon of polygons) {
+    if (pointInPolygon([lng, lat], polygon)) return true;
+  }
+  return false;
+}
+
+function getPolygonsFromGeoJson(geojson) {
+  const polygons = [];
+  const features = Array.isArray(geojson.features) ? geojson.features : [geojson];
+
+  features.forEach((feature) => {
+    const geometry = feature.geometry || feature;
+    if (!geometry) return;
+
+    if (geometry.type === 'Polygon') {
+      polygons.push(geometry.coordinates);
     }
+
+    if (geometry.type === 'MultiPolygon') {
+      geometry.coordinates.forEach((polygon) => polygons.push(polygon));
+    }
+  });
+
+  return polygons;
+}
+
+function pointInPolygon(point, polygonCoords) {
+  const [x, y] = point;
+  let inside = false;
+
+  for (let i = 0, j = polygonCoords.length - 1; i < polygonCoords.length; j = i++) {
+    const xi = polygonCoords[i][0];
+    const yi = polygonCoords[i][1];
+    const xj = polygonCoords[j][0];
+    const yj = polygonCoords[j][1];
+
+    const intersect = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
   }
 
-  return true;
+  return inside;
 }
 
 function createDrone(latlng) {
-  const routePoints = [latlng];
   const marker = L.marker(latlng, { icon: droneIcon }).addTo(map);
-  const routeLine = L.polyline(routePoints, {
+  const routeLine = L.polyline([latlng], {
     color: '#f5b700',
     weight: 3,
-    opacity: 0.8,
+    opacity: 0.85,
     lineCap: 'round',
     lineJoin: 'round'
   }).addTo(map);
@@ -186,31 +181,28 @@ function createDrone(latlng) {
   const drone = {
     marker,
     routeLine,
-    routePoints,
-    impactMarker: null,
-    isActive: true
+    routePoints: [latlng],
+    routeMarkers: [],
+    impactMarker: null
   };
 
   state.activeDrone = drone;
   state.drones.push(drone);
-
-  marker.bindPopup(`Geran-2<br>${countryConfig[state.selectedSide].label}`);
+  marker.bindPopup(`Geran-2<br>${state.selectedSide === 'ukraine' ? 'Украина' : 'Россия'}`);
   marker.openPopup();
-
   updateStatus('Дрон размещён. ЛКМ по карте — добавить маршрут, ПКМ — точка падения.');
 }
 
 function addRoutePoint(latlng) {
   if (!state.activeDrone) return;
+  const drone = state.activeDrone;
 
-  const { routePoints, routeLine } = state.activeDrone;
-  routePoints.push(latlng);
-  routeLine.setLatLngs(routePoints);
+  drone.routePoints.push(latlng);
+  drone.routeLine.setLatLngs(drone.routePoints);
 
-  const newPoint = L.marker(latlng, { icon: routePointIcon }).addTo(map);
-  newPoint.bindTooltip('Путь');
-
-  state.activeDrone.routePoints = routePoints;
+  const routeMarker = L.marker(latlng, { icon: routePointIcon }).addTo(map);
+  routeMarker.bindTooltip('Путь');
+  drone.routeMarkers.push(routeMarker);
 }
 
 function setImpactPoint(latlng) {
@@ -223,10 +215,69 @@ function setImpactPoint(latlng) {
     map.removeLayer(state.activeDrone.impactMarker);
   }
 
-  const marker = L.marker(latlng, { icon: impactIcon }).addTo(map);
-  marker.bindPopup('Точка падения');
-  state.activeDrone.impactMarker = marker;
+  const impactMarker = L.marker(latlng, { icon: impactIcon }).addTo(map);
+  impactMarker.bindPopup('Точка падения');
+  state.activeDrone.impactMarker = impactMarker;
   updateStatus('Точка падения установлена.');
+}
+
+function launchMission() {
+  if (state.drones.length === 0) {
+    showToast('Нет дронов для запуска.');
+    return;
+  }
+
+  state.launched = !state.launched;
+  launchBtn.textContent = state.launched ? '⏹ Остановить' : 'Запуск';
+  launchBtn.classList.toggle('launched', state.launched);
+
+  if (state.launched) {
+    updateStatus('🚀 Дроны запущены в полёт.');
+    showToast('Дроны в воздухе!');
+  } else {
+    updateStatus('Полёт остановлен.');
+    showToast('Остановлено.');
+  }
+}
+
+function loadCountryBorders() {
+  fetch(countryGeoJsonUrl)
+    .then((res) => res.json())
+    .then((data) => {
+      const features = data.features || [];
+
+      features.forEach((feature) => {
+        const iso = String(feature.properties?.ISO_A3 || feature.properties?.A3 || '').toUpperCase();
+        if (iso === 'UKR') {
+          state.countryLayers.ukraine = L.geoJSON(feature, {
+            style: {
+              color: '#3ad67a',
+              weight: 2,
+              opacity: 0.82,
+              fillColor: '#3ad67a',
+              fillOpacity: 0.12
+            }
+          }).addTo(map);
+        }
+
+        if (iso === 'RUS') {
+          state.countryLayers.russia = L.geoJSON(feature, {
+            style: {
+              color: '#62a6ff',
+              weight: 2,
+              opacity: 0.82,
+              fillColor: '#62a6ff',
+              fillOpacity: 0.12
+            }
+          }).addTo(map);
+        }
+      });
+
+      setSide('ukraine');
+    })
+    .catch(() => {
+      updateStatus('Не удалось загрузить границы стран. Проверьте подключение к интернету.');
+    });
 }
 
 sideButtons.forEach((button) => {
@@ -237,16 +288,25 @@ droneCard.addEventListener('click', () => {
   showToast('Geran-2 готов к запуску.');
 });
 
+launchBtn.addEventListener('click', launchMission);
+
 map.on('click', (event) => {
   const { lat, lng } = event.latlng;
 
   if (!state.activeDrone) {
-    if (!isInsideCountry(lat, lng, state.selectedSide)) {
-      showToast(`Дрон нельзя ставить вне ${countryConfig[state.selectedSide].label}.`);
+    const countryCode = state.selectedSide === 'ukraine' ? 'ukraine' : 'russia';
+    if (!isPointInsideCountry(lat, lng, countryCode)) {
+      showToast(`Дрон нельзя ставить вне ${state.selectedSide === 'ukraine' ? 'Украины' : 'России'}.`);
       return;
     }
 
     createDrone([lat, lng]);
+    return;
+  }
+
+  const countryCode = state.selectedSide === 'ukraine' ? 'ukraine' : 'russia';
+  if (!isPointInsideCountry(lat, lng, countryCode)) {
+    showToast('Маршрут должен проходить в пределах выбранной страны.');
     return;
   }
 
@@ -255,17 +315,25 @@ map.on('click', (event) => {
 
 map.on('contextmenu', (event) => {
   const { lat, lng } = event.latlng;
+  const countryCode = state.selectedSide === 'ukraine' ? 'ukraine' : 'russia';
+
+  if (!isPointInsideCountry(lat, lng, countryCode)) {
+    showToast('Точка падения должна быть в пределах страны.');
+    return;
+  }
+
   setImpactPoint([lat, lng]);
 });
-
-setSide('ukraine');
 
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && state.activeDrone) {
     map.removeLayer(state.activeDrone.marker);
-    if (state.activeDrone.routeLine) map.removeLayer(state.activeDrone.routeLine);
+    map.removeLayer(state.activeDrone.routeLine);
     if (state.activeDrone.impactMarker) map.removeLayer(state.activeDrone.impactMarker);
+    state.activeDrone.routeMarkers.forEach((marker) => map.removeLayer(marker));
     state.activeDrone = null;
-    updateStatus('Дрон удалён. Выберите место для нового запуска.');
+    updateStatus('Дрон удалён. Выберите новое место для запуска.');
   }
 });
+
+loadCountryBorders();
