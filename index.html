@@ -1,65 +1,81 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Симулятор БПЛА</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
-        .controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            z-index: 999;
-        }
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <div class="controls">
-        <h3>Симулятор БПЛА</h3>
-        <button onclick="addDrone()">Добавить дрон</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geran-2 Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-dot"></div>
+          <div>
+            <div class="eyebrow">Drone control</div>
+            <h1>Geran-2</h1>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">Команда</div>
+          <div class="button-group" id="sideSelector">
+            <button class="side-button active" data-side="ukraine" type="button">
+              Украина
+            </button>
+            <button class="side-button" data-side="russia" type="button">
+              Россия
+            </button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">Дрон</div>
+          <div class="drone-card selected" id="droneCard">
+            <div class="drone-card__icon" aria-hidden="true"></div>
+            <div>
+              <div class="drone-card__name">Geran-2</div>
+              <div class="drone-card__meta">Стратегический БПЛА</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel legend-panel">
+          <div class="panel-header">Управление</div>
+          <ul class="legend-list">
+            <li><span class="legend-key left-key"></span>ЛКМ — поставить дрон</li>
+            <li><span class="legend-key left-key"></span>ЛКМ по карте — маршрут</li>
+            <li><span class="legend-key right-key"></span>ПКМ — точка падения</li>
+          </ul>
+        </div>
+
+        <div class="status-box" id="statusBox">
+          Выберите сторону и нажмите на карту, чтобы разместить дрон.
+        </div>
+      </aside>
+
+      <main class="map-panel">
+        <div id="map"></div>
+      </main>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Инициализация карты с центром на Украину/Россию
-        const map = L.map('map').setView([50, 40], 4);
-
-        // Добавляем слой OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
-
-        // Маркеры дронов
-        const drones = [];
-
-        function addDrone() {
-            const lat = Math.random() * 10 + 45;
-            const lng = Math.random() * 30 + 25;
-            
-            const marker = L.marker([lat, lng]).addTo(map)
-                .bindPopup('Дрон #' + (drones.length + 1));
-            
-            drones.push(marker);
-            console.log('Дрон добавлен:', [lat, lng]);
-        }
-    </script>
-</body>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="./script.js"></script>
+  </body>
 </html>
