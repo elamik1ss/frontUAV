@@ -6,7 +6,7 @@ html, body {
   margin: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Inter', sans-serif;
+  font-family: Inter, Arial, sans-serif;
   background: #f3f3f3;
   color: #17181d;
 }
@@ -47,19 +47,19 @@ button {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a0a0a0, #ffffff);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, #c0c0c0, #ffffff);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 .eyebrow {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .brand-block h1 {
-  margin: 3px 0 0;
+  margin: 4px 0 0;
   font-size: 2.1rem;
   line-height: 1;
 }
@@ -68,12 +68,12 @@ button {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
-  padding: 12px 12px 10px;
+  padding: 12px;
   margin-bottom: 16px;
 }
 
 .panel-header {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.62);
@@ -112,7 +112,7 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 10px;
+  padding: 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -138,8 +138,8 @@ button {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   transform: translate(-50%, -48%) rotate(180deg);
   background: linear-gradient(135deg, #434b55, #1f2429);
   clip-path: polygon(50% 0%, 100% 100%, 62% 100%, 50% 74%, 38% 100%, 0% 100%);
@@ -169,6 +169,28 @@ button {
   color: rgba(255, 255, 255, 0.66);
 }
 
+.launch-btn {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #d5e8ff, #a9c9ff);
+  color: #10151b;
+  font-weight: 700;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 18px rgba(104, 154, 255, 0.22);
+}
+
+.launch-btn:hover {
+  transform: translateY(-1px);
+}
+
+.launch-btn.launched {
+  background: linear-gradient(180deg, #ffdfb1, #ffb85c);
+  box-shadow: 0 8px 18px rgba(255, 151, 41, 0.22);
+}
+
 .legend-panel {
   margin-top: 14px;
 }
@@ -180,7 +202,7 @@ button {
   display: grid;
   gap: 10px;
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
 }
 
 .legend-list li {
@@ -209,7 +231,7 @@ button {
 .status-box {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  padding: 12px 12px;
+  padding: 12px;
   color: rgba(255, 255, 255, 0.85);
   font-size: 0.85rem;
   line-height: 1.45;
@@ -242,10 +264,6 @@ button {
   border: none;
 }
 
-.country-zone {
-  border: 0 !important;
-}
-
 .route-marker {
   width: 12px !important;
   height: 12px !important;
@@ -264,18 +282,17 @@ button {
   color: white;
   padding: 10px 14px;
   border-radius: 999px;
-  font-size: 0.79rem;
+  font-size: 0.8rem;
   letter-spacing: 0.03em;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.22);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.25s ease;
   z-index: 700;
 }
 
 .utility-toast.visible {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
 }
 
 @media (max-width: 760px) {
@@ -292,6 +309,6 @@ button {
   }
 
   .map-panel {
-    height: calc(100vh - 320px);
+    height: calc(100vh - 330px);
   }
 }
